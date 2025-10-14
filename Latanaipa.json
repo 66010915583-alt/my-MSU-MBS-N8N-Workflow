@@ -1,0 +1,243 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "98c215da-c35c-40b3-b57b-fe42a90368b1",
+      "name": "Telegram Trigger",
+      "webhookId": "4d3d4b31-7245-4c11-9cd4-f2c03ccfa5dd",
+      "credentials": {
+        "telegramApi": {
+          "id": "jQFZafBuNhXx4e2L",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4eebe7e1-ffa0-4229-9bf3-3a6261d76c05",
+              "name": "Chatid",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "string"
+            },
+            {
+              "id": "5740ec7f-f00c-44f9-9a40-e355ecde1ad1",
+              "name": "messags",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "1eabfd36-d8d4-47b2-8d45-f7a560747a17",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.messags }}",
+        "options": {
+          "systemMessage": "สวัสดีค่ะร้านLita ยินดีให้บริการ รับบริการอะไรดีคะ ร้านเรามีบริการปั้มไลก์ปั้มฟอล\n100 ไลก์ 30บาท\n100 ฟอล 30บาท"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "ec93848a-3f07-47f8-a14c-c932e3a43e2d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        208
+      ],
+      "id": "05bd6800-c5bc-423b-9d09-c46a33db24bd",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "ryEakbVMYLYbERGR",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.Chatid }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        432,
+        208
+      ],
+      "id": "cb2f813f-f21e-423c-92cb-2c2fe3b13655",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "chatId": "{{ $('Edit Fields').item.json.Chatid }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        976,
+        0
+      ],
+      "id": "48af1531-39a9-4cb7-a104-9abbc0bf382b",
+      "name": "Send a text message",
+      "webhookId": "022e49f8-98f6-47b5-860d-7151e1e879d5",
+      "credentials": {
+        "telegramApi": {
+          "id": "jQFZafBuNhXx4e2L",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "=",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        736,
+        -144
+      ],
+      "id": "fc50117d-d3b5-49d9-b7be-39a83c69c80c",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qX21DS8IquQAezz8",
+          "name": "Google Sheets account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d213c1c7-6c98-4293-9fda-d60769194086",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "253fba805075cfd15b8cd6601d99bf035b7413681c8f797e5b4ab75d2670eaa8"
+  },
+  "id": "vXuobwyv6nW6teif",
+  "tags": []
+}
