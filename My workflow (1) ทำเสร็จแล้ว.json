@@ -1,0 +1,570 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4eebe7e1-ffa0-4229-9bf3-3a6261d76c05",
+              "name": "Chat -id",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "string"
+            },
+            {
+              "id": "5740ec7f-f00c-44f9-9a40-e355ecde1ad1",
+              "name": "messags",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "69b49e6d-1b83-4e41-8e56-6b8fddc5937a",
+              "name": "Chat -id2.",
+              "value": "={{ $json.message.from.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        592,
+        16
+      ],
+      "id": "055edaf8-2505-46f1-9b54-1cf0d8e31c07",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$node[\"Telegram Trigger1\"].json[\"message\"][\"text\"]}}",
+        "options": {
+          "systemMessage": "สวัสดีค่ะร้าน Lita ยินดีให้บริการค่ะ\nฟอล\t50\t15\nฟอล\t100\t30\nฟอล\t150\t45\nฟอล\t200\t60\nฟอล\t250\t75\nฟอล\t300\t90\nฟอล\t350\t105\nฟอล\t400\t120\nฟอล\t450\t135\nฟอล\t500\t150\nไลก์\t50\t15\nไลก์\t100\t30\nไลก์\t150\t45\nไลก์\t200\t60\nไลก์\t250\t75\nไลก์\t300\t90\nไลก์\t350\t105\nไลก์\t400\t120\nไลก์\t450\t135\nไลก์\t500\t150\nแจ้ง"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        16
+      ],
+      "id": "5a250d90-28a1-4d3a-9e17-c462b75390e7",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        256
+      ],
+      "id": "23a0cd7d-7259-461f-94bf-36504ad9e413",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "yilGpG4HghCSbDGu",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields').item.json['Chat -id'] }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        896,
+        240
+      ],
+      "id": "ccb2b713-1950-47f6-9017-bda61baceb64",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "chatId": "={{$node[\"Telegram Trigger1\"].json[\"message\"][\"chat\"][\"id\"]}}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1328,
+        16
+      ],
+      "id": "2342dbfa-eba0-4f79-9f9c-6123965442ea",
+      "name": "Send a text message1",
+      "webhookId": "92416019-c846-499d-b376-228846c88067",
+      "credentials": {
+        "telegramApi": {
+          "id": "oy1WBi8hzYj7a6gw",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1d44a7a2-94f9-4a09-a961-5596a334125a",
+      "name": "Telegram Trigger1",
+      "webhookId": "bb90b6ea-436b-4d2f-8fe3-68054377b62f",
+      "credentials": {
+        "telegramApi": {
+          "id": "oy1WBi8hzYj7a6gw",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ce5a9038-9084-48d6-875e-95073db14c2d",
+              "leftValue": "={{$json[\"message\"][\"photo\"][0][\"file_id\"] || $json[\"message\"][\"document\"][\"file_id\"]}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        0
+      ],
+      "id": "6c585773-6996-4279-8ded-33e3ecdaeeb1",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "={{$node[\"Telegram Trigger1\"].json[\"message\"][\"chat\"][\"id\"]}}",
+        "text": "ได้รับสลิปแล้วค่ะ ✅ กำลังตรวจสอบนะคะ",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        592,
+        -272
+      ],
+      "id": "22bf2c94-cd03-4a77-9f2e-8b64a145182a",
+      "name": "Send a text message",
+      "webhookId": "f8f01407-6d0b-4897-ba21-b09cef581c0e",
+      "credentials": {
+        "telegramApi": {
+          "id": "oy1WBi8hzYj7a6gw",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot8072527699:AAGTxo96nK_DT1MxqHOAbmiW6DvcmQfyhOQ/getFile?file_id={{$node[\"Telegram Trigger1\"].json[\"message\"][\"photo\"][0][\"file_id\"]}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        -272
+      ],
+      "id": "213d23ce-df89-4727-84c9-a6d2ee597bed",
+      "name": "Get file info"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/file/bot8072527699:AAGTxo96nK_DT1MxqHOAbmiW6DvcmQfyhOQ/{{ $json[\"result\"][\"file_path\"] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1008,
+        -272
+      ],
+      "id": "eb4fd9f1-917c-46cd-850b-52228d8f8d6a",
+      "name": "Download slip"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.ocr.space/parse/image",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "K89956163788957"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1216,
+        -272
+      ],
+      "id": "9379daf1-5b8b-4c23-baea-a5a7de78b199",
+      "name": "OCR"
+    },
+    {
+      "parameters": {
+        "chatId": "={{$node[\"Telegram Trigger1\"].json[\"message\"][\"chat\"][\"id\"]}}",
+        "text": "=ตรวจสอบข้อมูลการโอนเรียบร้อย ✅  \nระบบอ่านจากสลิปได้ดังนี้:  \n\n{{$json[\"ParsedResults\"][0][\"ParsedText\"]}}\n\nหากข้อมูลไม่ถูกต้อง กรุณาส่งสลิปใหม่อีกครั้ง 🙏",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1424,
+        -272
+      ],
+      "id": "2e59f025-f599-4f77-b948-b8084788da14",
+      "name": "Send a text message2",
+      "webhookId": "8e40ea5c-0672-4d7e-a251-d51dc1aead87",
+      "credentials": {
+        "telegramApi": {
+          "id": "oy1WBi8hzYj7a6gw",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7890ba60-54bd-4e8b-ba9e-59008cefa5e0",
+              "name": "chat_id",
+              "value": "={{$json[\"chat\"][\"id\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "a1337fe0-9d41-4756-b5eb-a38da0e57231",
+              "name": "file_id",
+              "value": "={{$json[\"photo\"][0][\"file_id\"]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1632,
+        -272
+      ],
+      "id": "d4939603-1197-43e7-9812-50d768879949",
+      "name": "set product pricrs"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4ad1c20b-c284-45e2-adb5-69683dd16183",
+              "leftValue": "={{ $json[\"OCR\"][\"ParsedResults\"][0][\"ParsedText\"] }}",
+              "rightValue": "={{ $node[\"set product pricrs\"].json[\"price\"] }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1840,
+        -272
+      ],
+      "id": "78139ae3-5b08-4cfb-9bd1-7c08104876b2",
+      "name": "Check amount"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $node[\"Telegram Trigger1\"].json[\"message\"][\"chat\"][\"id\"] }}",
+        "text": "✅ ตรวจสอบสลิปเรียบร้อยแล้วค่ะ   ยอดเงินตรงกับราคาสินค้า ระบบจะเริ่มดำเนินการให้นะคะ 💬",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2064,
+        -560
+      ],
+      "id": "d968fd99-7dc0-4487-9c58-ea82f59efcdd",
+      "name": "Send a text message3",
+      "webhookId": "2f76d93b-bd77-4675-91b6-5f491130d344",
+      "credentials": {
+        "telegramApi": {
+          "id": "oy1WBi8hzYj7a6gw",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $node[\"Telegram Trigger1\"].json[\"message\"][\"chat\"][\"id\"] }}",
+        "text": "❌ ยอดเงินไม่ตรงกับราคาสินค้า   กรุณาตรวจสอบสลิปหรือยอดโอนอีกครั้งค่ะ 🙏",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2048,
+        -176
+      ],
+      "id": "5c4ac09c-8ef4-4bc9-9eb5-b599bb418b1e",
+      "name": "Send a text message4",
+      "webhookId": "2e42fe4d-52b1-4e1f-903a-332e44be4cfc",
+      "credentials": {
+        "telegramApi": {
+          "id": "oy1WBi8hzYj7a6gw",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Get file info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get file info": {
+      "main": [
+        [
+          {
+            "node": "Download slip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download slip": {
+      "main": [
+        [
+          {
+            "node": "OCR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OCR": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message2": {
+      "main": [
+        [
+          {
+            "node": "set product pricrs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set product pricrs": {
+      "main": [
+        [
+          {
+            "node": "Check amount",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check amount": {
+      "main": [
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message3": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "62f39d8f-90f0-4fa0-9abc-b0d372ec6921",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5ea8b8c3aa527bd513f66b628885100cee52448a51680fe33f65dd1b05c143eb"
+  },
+  "id": "ZXG2u5RIyLLyRdgW",
+  "tags": []
+}
