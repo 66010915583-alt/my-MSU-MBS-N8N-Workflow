@@ -1,0 +1,259 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4eebe7e1-ffa0-4229-9bf3-3a6261d76c05",
+              "name": "Chat -id",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "string"
+            },
+            {
+              "id": "5740ec7f-f00c-44f9-9a40-e355ecde1ad1",
+              "name": "messags",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "69b49e6d-1b83-4e41-8e56-6b8fddc5937a",
+              "name": "Chat -id2.",
+              "value": "={{ $json.message.from.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        0
+      ],
+      "id": "1eabfd36-d8d4-47b2-8d45-f7a560747a17",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$node[\"Telegram Trigger1\"].json[\"message\"][\"text\"]}}",
+        "options": {
+          "systemMessage": "สวัสดีค่ะร้าน Lita ยินดีให้บริการค่ะ\nฟอล\t50\t15\nฟอล\t100\t30\nฟอล\t150\t45\nฟอล\t200\t60\nฟอล\t250\t75\nฟอล\t300\t90\nฟอล\t350\t105\nฟอล\t400\t120\nฟอล\t450\t135\nฟอล\t500\t150\nไลก์\t50\t15\nไลก์\t100\t30\nไลก์\t150\t45\nไลก์\t200\t60\nไลก์\t250\t75\nไลก์\t300\t90\nไลก์\t350\t105\nไลก์\t400\t120\nไลก์\t450\t135\nไลก์\t500\t150\nแจ้ง"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        832,
+        0
+      ],
+      "id": "ec93848a-3f07-47f8-a14c-c932e3a43e2d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        240
+      ],
+      "id": "05bd6800-c5bc-423b-9d09-c46a33db24bd",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "ryEakbVMYLYbERGR",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields').item.json['Chat -id'] }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        928,
+        224
+      ],
+      "id": "cb2f813f-f21e-423c-92cb-2c2fe3b13655",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "chatId": "={{$node[\"Telegram Trigger1\"].json[\"message\"][\"chat\"][\"id\"]}}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1360,
+        0
+      ],
+      "id": "e7083aa9-64dc-45ca-abfd-acc23f2f3e05",
+      "name": "Send a text message1",
+      "webhookId": "92416019-c846-499d-b376-228846c88067",
+      "credentials": {
+        "telegramApi": {
+          "id": "jQFZafBuNhXx4e2L",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        -16
+      ],
+      "id": "4426acb3-cbd0-475c-a8bd-ed4145e5d94e",
+      "name": "Telegram Trigger1",
+      "webhookId": "bb90b6ea-436b-4d2f-8fe3-68054377b62f",
+      "credentials": {
+        "telegramApi": {
+          "id": "M71fmxdsDHFVcMpj",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ce5a9038-9084-48d6-875e-95073db14c2d",
+              "leftValue": "={{$json[\"message\"][\"photo\"] || $json[\"message\"][\"document\"]}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        288,
+        -16
+      ],
+      "id": "008bd4b9-b36c-493d-baa7-830c3033ac0b",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0664f31c-aeef-4ce8-b1e8-056179c7433f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "253fba805075cfd15b8cd6601d99bf035b7413681c8f797e5b4ab75d2670eaa8"
+  },
+  "id": "vXuobwyv6nW6teif",
+  "tags": []
+}
